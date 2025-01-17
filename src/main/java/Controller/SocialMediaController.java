@@ -1,6 +1,7 @@
 package Controller;
 
 import DAO.UserDAO;
+import Exceptions.UnauthorizedException;
 import Model.Account;
 import Service.UserService;
 import io.javalin.Javalin;
@@ -30,9 +31,13 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.post("/register", this::handleReigister);
+        app.post("/login", this::handleLogin);
 
         return app;
     }
+
+
+
 
     /**
      * This is an example handler for an example endpoint.
@@ -49,6 +54,26 @@ public class SocialMediaController {
             ctx.status(200).json(createdAccount);
         } catch (IllegalArgumentException e) {
             ctx.status(400).result("");
+        } catch(Exception e){
+            ctx.status(500).result("Internal server error: " + e.getMessage());
+        }
+    }
+
+
+    private void handleLogin(Context ctx){
+
+        try {
+            // Pase JSON body into account
+            Account requestAccount = ctx.bodyAsClass(Account.class);
+            
+            // Validate the login using the service layer
+            Account loggedIAccount = userService.login(requestAccount.getUsername(), requestAccount.getPassword());
+
+            ctx.status(200).json(loggedIAccount);
+        } catch (UnauthorizedException e){
+            ctx.status(401).result("");
+        } catch(IllegalArgumentException e){
+            ctx.status(400).result(e.getMessage());
         } catch(Exception e){
             ctx.status(500).result("Internal server error: " + e.getMessage());
         }

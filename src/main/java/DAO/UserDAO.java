@@ -65,6 +65,34 @@ public class UserDAO {
             throw new RuntimeException("Error checking for existing user");
         }
     }
+
+
+    public Account validateLogin(String userName, String password){
+
+        String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
+
+        try (Connection connect = ConnectionUtil.getConnection();
+        PreparedStatement preparedStatement = connect.prepareStatement(sql)){
+
+            preparedStatement.setString(1, userName);
+            preparedStatement.setString(2, password);
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()){
+                    int id = resultSet.getInt("account_id");
+                    String username = resultSet.getString("username");
+                    String dbPassword = resultSet.getString("password");
+
+                    return new Account(id, username, dbPassword);
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Error validating login: " + e.getMessage());
+        }
+
+        return null;
+    }
 }
 
 

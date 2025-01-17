@@ -1,7 +1,9 @@
 package Service;
 
 import DAO.UserDAO;
+import Exceptions.UnauthorizedException;
 import Model.Account;
+import io.javalin.http.UnauthorizedResponse;
 
 public class UserService {
 
@@ -40,5 +42,23 @@ public class UserService {
      }
 
 
-    
+     public Account login(String userName, String password){
+
+        if(userName == null || userName.trim().isEmpty()){
+            throw new IllegalArgumentException("Username cannot be blank");
+        }
+
+        if (password == null || password.trim().isEmpty()){
+            throw new IllegalArgumentException("Password cannot be blank");
+        }
+
+        // Validate credentials
+        Account account = userDAO.validateLogin(userName, password);
+
+        if(account == null){
+            throw new UnauthorizedException("Invalid username or password");
+        }
+        
+        return account;
+     }
 }
