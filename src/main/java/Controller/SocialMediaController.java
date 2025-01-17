@@ -1,8 +1,13 @@
 package Controller;
 
+import org.eclipse.jetty.io.EofException;
+
+import DAO.MessageDAO;
 import DAO.UserDAO;
 import Exceptions.UnauthorizedException;
 import Model.Account;
+import Model.Message;
+import Service.MessageService;
 import Service.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
@@ -15,10 +20,12 @@ import io.javalin.http.Context;
 public class SocialMediaController {
 
     UserService userService;
+    MessageService messageService;
 
     // Constructor for dependency
     public SocialMediaController(){
         this.userService = new UserService(new UserDAO()); 
+        this.messageService = new MessageService(new MessageDAO());
     }
 
 
@@ -32,6 +39,7 @@ public class SocialMediaController {
         Javalin app = Javalin.create();
         app.post("/register", this::handleReigister);
         app.post("/login", this::handleLogin);
+        app.post("/messages", this::handleCreateMessage);
 
         return app;
     }
@@ -75,6 +83,28 @@ public class SocialMediaController {
         } catch(IllegalArgumentException e){
             ctx.status(400).result(e.getMessage());
         } catch(Exception e){
+            ctx.status(500).result("Internal server error: " + e.getMessage());
+        }
+    }
+
+
+
+    /**
+     * Handles the POST /message endpoint
+     * @param ctx The Javalin Contect object that manages the HTTP rquest and response
+     * 
+     */
+    private void handleCreateMessage(Context ctx){
+        try {
+            Message requestMessage = ctx.bodyAsClass(Message.class);
+
+            // Validate and Create
+            Message createdMessage = messageService.createMessage(requestMessage);
+
+            ctx.status(200).json(createdMessage);
+        } catch (IllegalArgumentException e) {
+            ctx.status(400).result("");
+        } catch (Exception e){
             ctx.status(500).result("Internal server error: " + e.getMessage());
         }
     }

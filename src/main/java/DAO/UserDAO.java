@@ -67,6 +67,19 @@ public class UserDAO {
     }
 
 
+
+
+
+    /**
+     * Validates login credentials by checking if the provided username and password
+     * match a recrod in the database
+     * @param userName The username provided by the user
+     * @param password The password provided by the user
+     * @return An Account object containing the account details if the credentials are valid,
+     *         or null if no matching account is found
+     * @throws RuntimeException if a database error occurs durring the validation process.
+     * 
+     */
     public Account validateLogin(String userName, String password){
 
         String sql = "SELECT * FROM account WHERE username = ? AND password = ?";

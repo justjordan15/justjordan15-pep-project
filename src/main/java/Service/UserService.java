@@ -42,6 +42,24 @@ public class UserService {
      }
 
 
+
+
+
+     /**
+      * Validate the provided username and password to log in a user 
+      *
+      * Ensures the username and password are not blank, validates credentials
+      * by querying the database through the UserDAO, and returns the corresponding
+      * Account object if the credentials are valid
+      *
+      * @param userName The username provided by the user (cannot be null or blank).
+      * @param password The password provided by the user (cannot be null or blank).
+      * @return The account object containing the user's details if the login is successful.
+      * @throws UnauthorizedException If the username and password do not match any account
+      * in the database   
+      */
+
+
      public Account login(String userName, String password){
 
         if(userName == null || userName.trim().isEmpty()){
