@@ -22,7 +22,6 @@ public class UserService {
      * @return the created Account object
      * @throws IllegalArgumentException if validation fails
      */
-
      public Account registerUser(String userName, String password){
 
         if(userName == null || userName.trim().isEmpty()){
@@ -58,8 +57,6 @@ public class UserService {
       * @throws UnauthorizedException If the username and password do not match any account
       * in the database   
       */
-
-
      public Account login(String userName, String password){
 
         if(userName == null || userName.trim().isEmpty()){

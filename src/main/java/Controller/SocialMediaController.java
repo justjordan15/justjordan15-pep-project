@@ -74,6 +74,10 @@ public class SocialMediaController {
     }
 
 
+    /**
+     * Handles the POST /login endpoint
+     * @param ctx The Javalin Contect object that manages the HTTP rquest and response
+     */
     private void handleLogin(Context ctx){
 
         try {
