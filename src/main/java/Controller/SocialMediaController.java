@@ -2,7 +2,6 @@ package Controller;
 
 import java.util.List;
 
-import org.eclipse.jetty.io.EofException;
 
 import DAO.MessageDAO;
 import DAO.UserDAO;
@@ -45,6 +44,8 @@ public class SocialMediaController {
         app.get("/messages", this::handleGetAllMessages);
         app.get("messages/{message_id}", this::handleGetMessageById);
         app.delete("/messages/{message_id}", this::handleDeleteMessageById);
+        app.patch("/messages/{message_id}", this::handleUpdateMessageText);
+        app.get("/accounts/{account_id}/messages", this::hadleGetMessagesByUserId);
 
         return app;
     }
@@ -169,6 +170,53 @@ public class SocialMediaController {
         } catch (Exception e) {
             ctx.status(500).result("Internal server error: " + e.getMessage());
         }
+    }
+
+
+    /**
+     * Handles the PATCH /messages/{message_id} endpoint
+     * @param ctx The Javalin Context object that manages the HTTP request and response
+     */
+    private void handleUpdateMessageText(Context ctx){
+        try {
+            
+            int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+
+            Message requestBody = ctx.bodyAsClass(Message.class);
+            String newMessageText = requestBody.getMessage_text();
+
+            Message updatedMessage = messageService.updateMessageTextById(messageId, newMessageText);
+
+            ctx.status(200).json(updatedMessage);
+        } catch (IllegalArgumentException e) {
+            ctx.status(400).result("");
+        } catch (Exception e) {
+            ctx.status(500).result("Internal server error: " + e.getMessage());
+        }
+
+    }
+
+
+
+    /**
+     * Handles the GET /accounts/{account_id}/messages endpoint
+     * 
+     * @param ctx The Javalin Context object that manages the HTTP request and response
+     */
+    private void hadleGetMessagesByUserId(Context ctx){
+
+        try {
+            int accountId = Integer.parseInt(ctx.pathParam("account_id"));
+
+            List<Message> userMessages = messageService.getMessagesByUserId(accountId);
+
+            ctx.status(200).json(userMessages);
+        } catch (NumberFormatException e) {
+            ctx.status(400).result("");
+        } catch (Exception e) {
+            ctx.status(500).result("Internal server error: " + e.getMessage());
+        }
+
     }
 
 

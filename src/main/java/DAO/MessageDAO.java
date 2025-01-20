@@ -192,4 +192,87 @@ public class MessageDAO {
         // Return null if no message was found
         return null;
     }
+
+
+
+    /**
+     * Updates the message_text of a message identified by its ID.
+     * 
+     * @param messageID The ID of the message to update
+     * @param newMessageText The new text for the message
+     * @return Thee updated Message object if successful, or null if the message does not exist.
+     * @throws IllegalArgumentException If the message does not exist or the update fails.
+     */
+    public Message updMessageTextByID(int messageID, String newMessageText){
+
+        String selectSQL = "SELECT * FROM message WHERE message_id = ?";
+        String updateSQL = "UPDATE message SET message_text = ? WHERE message_id = ?";
+
+        try (Connection connect = ConnectionUtil.getConnection()){
+            
+            try(PreparedStatement selectStmt = connect.prepareStatement(selectSQL)){
+                selectStmt.setInt(1, messageID);
+
+                try(ResultSet resultSet = selectStmt.executeQuery()){
+                    if(resultSet.next()){
+
+                        try(PreparedStatement updateStmt = connect.prepareStatement(updateSQL)){
+                            updateStmt.setString(1, newMessageText);
+                            updateStmt.setInt(2, messageID);
+                            int rowsUpdated = updateStmt.executeUpdate();
+                      
+                            if(rowsUpdated > 0){
+                                int id = resultSet.getInt("message_id");
+                                String messageText = newMessageText;
+                                int postedBy = resultSet.getInt("posted_by");
+                                long timePosted = resultSet.getLong("time_posted_epoch");
+    
+                                return new Message(id, postedBy, messageText, timePosted);
+                            }
+                        }    
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating message text: " + e.getMessage(), e);
+        }
+
+        // Return null if no message was found
+        return null;
+    }
+
+
+
+    /**
+     * Retrieves all messages written by a specific user from the database.
+     * 
+     * @param accountId The ID of the user whose messages need to be retrieved.
+     * @return A list of Message objects written by the user, or an empty list if no messages exist.
+     */
+    public List<Message> getMessagesByUserId(int accountId){
+
+        String sql = "SELECT * FROM message WHERE posted_by = ?";
+        List<Message> messages = new ArrayList<>();
+
+        try(Connection connect = ConnectionUtil.getConnection();
+            PreparedStatement preparedStatement =connect.prepareStatement(sql)){
+
+                preparedStatement.setInt(1, accountId);
+
+                try(ResultSet resultSet = preparedStatement.executeQuery()){
+                    while (resultSet.next()) {
+                        int messagId = resultSet.getInt("message_id");
+                        String messageText = resultSet.getString("message_text");
+                        long timePostedEpoch = resultSet.getLong("time_posted_epoch");
+
+                        Message message = new Message(messagId, accountId, messageText, timePostedEpoch);
+                        messages.add(message);
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("Error retrieving messages by user ID: " + e.getMessage());
+            }
+        
+        return messages;
+    }
 }

@@ -72,5 +72,44 @@ public class MessageService {
      public Message deleteMessageByID(int messageId){
         return messageDAO.deleteMessageById(messageId);
      }
+
+
+     /**
+      * Updates the message_text of a message by its ID.
+      *
+      * @param messageId The ID of the message to update.
+      * @param newMessageText The new text for the message.
+      * @return The updated Message object if successful
+      * @throws IllegalArgumentException If the validation fails or the message does not exist.
+      */
+
+     public Message updateMessageTextById(int messageId, String newMessageText){
+
+        if(newMessageText == null || newMessageText.trim().isEmpty()){
+            throw new IllegalArgumentException("Message text cannot be blank");
+        }
+        
+        if(newMessageText.length() > 255){
+            throw new IllegalArgumentException("Message text cannot exceed 255 characters.");
+        }
+
+        Message updatedMessage = messageDAO.updMessageTextByID(messageId, newMessageText);
+
+        if(updatedMessage == null){
+            throw new IllegalArgumentException("Message with ID " + " does not excist");
+        }
+        
+        return updatedMessage;
+     }
+
+     /**
+      * Retrieves all messages written by a specific user.
+      *
+      * @param accountId The ID of the user whose messages need to be retrieved.
+      * @return A list of Message objects written by the user, or an empty list if no messages exist.
+      */
+     public List<Message> getMessagesByUserId(int accountId){
+        return messageDAO.getMessagesByUserId(accountId);
+     }
     
 }

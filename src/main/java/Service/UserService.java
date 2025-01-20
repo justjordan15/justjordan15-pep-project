@@ -3,7 +3,7 @@ package Service;
 import DAO.UserDAO;
 import Exceptions.UnauthorizedException;
 import Model.Account;
-import io.javalin.http.UnauthorizedResponse;
+
 
 public class UserService {
 
