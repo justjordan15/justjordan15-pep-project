@@ -1,8 +1,8 @@
 package DAO;
 
 import java.sql.*;
-
-
+import java.util.ArrayList;
+import java.util.List;
 
 import Model.Message;
 import Util.ConnectionUtil;
@@ -72,5 +72,124 @@ public class MessageDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Error checking if user exist");
         }
+    }
+
+
+    /**
+     * Retrives all messages from the database.
+     * 
+     * @return A list of Message objects representing all messages in the database.
+     *         Returns an empty list if there are no messages.
+     */
+    public List<Message> getAllMessages(){
+
+        String sql = "SELECT * FROM message";
+        List<Message> messages = new ArrayList<>();
+
+        try (Connection connect = ConnectionUtil.getConnection();
+            PreparedStatement preparedStatement = connect.prepareStatement(sql)){
+
+                try(ResultSet resultSet = preparedStatement.executeQuery()){
+                    while (resultSet.next()) {
+                        int messageId = resultSet.getInt("message_id");
+                        String messageText = resultSet.getString("message_text");
+                        int postedBy = resultSet.getInt("posted_by");
+                        long timePosted = resultSet.getLong("time_posted_epoch");
+
+                        Message message = new Message(messageId, postedBy, messageText, timePosted);
+
+                        messages.add(message);
+                        
+                    }
+                }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving all messages: " + e.getMessage());
+        }
+
+        return messages;
+
+    }
+
+
+
+    /**
+     * Retrives a message from the databse by its ID.
+     * 
+     * @param messageId The ID of the message to retrieve.
+     * @return A Message object representing the message, or null if so such message exists.
+     */
+    public Message getMessageById(int messageId){
+
+        String sql = "SELECT * FROM message WHERE message_id = ?";
+
+        try(Connection connect = ConnectionUtil.getConnection();
+            PreparedStatement preparedStatement = connect.prepareStatement(sql)) {
+
+                preparedStatement.setInt(1, messageId);
+
+                try(ResultSet resultSet = preparedStatement.executeQuery()){
+                    if (resultSet.next()) {
+                        int id = resultSet.getInt("message_id");
+                        String messageText = resultSet.getString("message_text");
+                        int postedBy = resultSet.getInt("posted_by");
+                        long timePosted = resultSet.getLong("time_posted_epoch");
+
+                        return new Message(id, postedBy, messageText, timePosted);
+                    }
+                }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving message by ID: " + e.getMessage(), e);
+        }
+
+        // If no message is found
+        return null;
+
+    }
+
+
+    /**
+     * Deletes a message fro mthe database by its ID.
+     * 
+     * @param messageId The ID of the message to delete.
+     * @return The deleted message object if it existed, or null if no such message existed.
+     */
+    public Message deleteMessageById(int messageId){
+
+        String selectSQL = "SELECT * FROM message WHERE message_id = ?";
+        String deleteSQL = "DELETE FROM message WHERE message_id = ?";
+
+        try (Connection connect = ConnectionUtil.getConnection()){
+
+            try(PreparedStatement selectStmt = connect.prepareStatement(selectSQL)){
+                selectStmt.setInt(1, messageId);
+
+                try(ResultSet resultSet = selectStmt.executeQuery()){
+                    if(resultSet.next()){
+                        int id = resultSet.getInt("message_id");
+                        String messageText = resultSet.getString("message_text");
+                        int postedBy = resultSet.getInt("posted_by");
+                        long timePosted = resultSet.getLong("time_posted_epoch");
+
+                        Message message = new Message(id, postedBy, messageText, timePosted);
+
+                        try(PreparedStatement deleteStmt = connect.prepareStatement(deleteSQL)){
+                            deleteStmt.setInt(1, messageId);
+                            deleteStmt.executeUpdate();
+                        }
+
+                        // The deleted message
+                        return message;
+                    }
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting message by ID: " + e.getMessage());
+        }
+
+        // Return null if no message was found
+        return null;
     }
 }

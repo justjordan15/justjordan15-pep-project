@@ -1,5 +1,7 @@
 package Controller;
 
+import java.util.List;
+
 import org.eclipse.jetty.io.EofException;
 
 import DAO.MessageDAO;
@@ -40,6 +42,9 @@ public class SocialMediaController {
         app.post("/register", this::handleReigister);
         app.post("/login", this::handleLogin);
         app.post("/messages", this::handleCreateMessage);
+        app.get("/messages", this::handleGetAllMessages);
+        app.get("messages/{message_id}", this::handleGetMessageById);
+        app.delete("/messages/{message_id}", this::handleDeleteMessageById);
 
         return app;
     }
@@ -105,6 +110,63 @@ public class SocialMediaController {
         } catch (IllegalArgumentException e) {
             ctx.status(400).result("");
         } catch (Exception e){
+            ctx.status(500).result("Internal server error: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Handles GET /messages endpoint
+     * @param ctx The Javalin Contect object that manages the HTTP request and response. 
+     */
+    private void handleGetAllMessages(Context ctx){
+        try {
+            List<Message> allMessages = messageService.getAllMessages();
+
+            ctx.status(200).json(allMessages);
+        } catch (Exception e) {
+            ctx.status(500).result("Internal server error: " + e.getMessage());
+        }
+
+    }
+
+
+    private void handleGetMessageById(Context ctx){
+        try {
+            int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+
+            Message message = messageService.getMessageById(messageId);
+
+            if(message == null){
+                ctx.status(200).json("");
+            } else{
+                ctx.status(200).json(message);
+            }
+
+        } catch (Exception e) {
+            ctx.status(500).result("Internal server error: " + e.getLocalizedMessage());
+        }
+    }
+
+
+    /**
+     * Handles the DELETE /messages/{message_id} endpoint.
+     * 
+     * @param ctx The Javalin Context object that manages the HTTP request and response.
+     */
+    private void handleDeleteMessageById(Context ctx){
+        try {
+            
+            int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+
+            Message deletedMessage = messageService.deleteMessageByID(messageId);
+
+            if(deletedMessage != null){
+                ctx.status(200).json(deletedMessage);
+            } else{
+                ctx.status(200).result("");
+            }
+        } catch (Exception e) {
             ctx.status(500).result("Internal server error: " + e.getMessage());
         }
     }

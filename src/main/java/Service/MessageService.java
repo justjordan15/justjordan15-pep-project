@@ -1,5 +1,7 @@
 package Service;
 
+import java.util.List;
+
 import DAO.MessageDAO;
 import Model.Message;
 
@@ -38,6 +40,37 @@ public class MessageService {
         }
 
         return messageDAO.createMessage(message);
+     }
+
+     /**
+      * Retrives all messages from the database.
+      *
+      * @return A list of Message objects representing all messages in the database
+      */
+
+     public List<Message> getAllMessages(){
+        return messageDAO.getAllMessages();
+     }
+
+     /**
+      * Retrives a message by its ID.
+      *
+      * @param messageId The ID of the message to retrive
+      * @return A Message object representing the message, or null if no such message exists.
+      */
+     public Message getMessageById(int messageId){
+        return messageDAO.getMessageById(messageId);
+     }
+
+
+     /**
+      * Deletes a message by its ID.
+      *
+      * @param messageId The ID of the message to delete.
+      * @return The deleted Message object if it existed, or null if no such message existed.
+      */
+     public Message deleteMessageByID(int messageId){
+        return messageDAO.deleteMessageById(messageId);
      }
     
 }
